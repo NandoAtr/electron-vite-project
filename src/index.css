@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+.spanCustom {
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent
+  }
+  
+  .text-border {
+    -webkit-text-stroke-width: 1px; /* largura da borda */
+    -webkit-text-stroke-color: #fff; /* cor da borda */
+  }
+  
+  .customScrool::-webkit-scrollbar {
+    display: none;
+  }
+body,html, #root {
+  height: 100%;
+  overflow-y: hidden;
+} 
