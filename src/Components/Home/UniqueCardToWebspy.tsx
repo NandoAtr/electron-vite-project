@@ -12,7 +12,7 @@ type productType = {
   url: string;
 };
 
-export const UniqueCard = (product: productType) => {
+export const UniqueCardToWebspy = (product: productType) => {
   const [successfully, setSuccessfully] = React.useState(false);
   const [error, setError] = React.useState(false);
   const [message, setMessage] = React.useState("");
@@ -20,21 +20,28 @@ export const UniqueCard = (product: productType) => {
   const onOpen = async () => {
     console.log("open");
     const storedAccessToken = localStorage.getItem("accessToken");
-
-    const mensagem = await ipcRenderer.invoke("open-new-window", {
+    const refreshToken = localStorage.getItem("refreshToken");
+    const mensagem = await ipcRenderer.invoke("open-new-window-to-webspy", {
       url: `${product?.url}`,
-      token: storedAccessToken,
+      accessToken: storedAccessToken,
       tool: product.name,
+      refreshToken: refreshToken,
     });
+    // const mensagem = await ipcRenderer.invoke("open-new-window", {
+    //   url: `${product?.url}`,
+    //   token: storedAccessToken,
+    //   tool: product.name,
+    // });
+    console.log(mensagem);
     if (mensagem !== "Ops... ocorreu um error!") {
-      setSuccessfully(true);
+      setSuccessfully(true)
       setTimeout(() => {
-        setSuccessfully(false);
+        setSuccessfully(false)
       }, 4000);
-    } else {
-      setError(true);
+    }else{
+      setError(true)
       setTimeout(() => {
-        setError(false);
+        setError(false)
       }, 6000);
     }
   };

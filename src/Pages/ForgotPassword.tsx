@@ -11,7 +11,7 @@ export const ForgotPassword = () => {
         const response:any = await axios.post('https://api.webspy.com.br/auth/signin',data)  
     }
 
-    const [successfully,setSuccessfully] = React.useState(false)
+    const [successfully,setSuccessfully] = React.useState(false)// eslint-disable-line no-unused-vars
     const [error,setError] = React.useState(false)
     const [message,setMessage] = React.useState('')
 

@@ -1,6 +1,5 @@
 import React, { useContext } from "react";
 import { axiosPrivate } from "../Common/http/axiosPrivate";
-import { Cards } from "../Components/Home/Cards";
 import { UserContext } from "../Contexts/UserContext";
 import { ClientJS } from "clientjs";
 import ComponentLoader from "../Components/Loader/ComponentLoader";
@@ -9,10 +8,11 @@ import { Notification } from "../Components/Notification/NotificationSimple";
 import { CiFaceSmile } from "react-icons/ci";
 import { useNavigate } from "react-router-dom";
 import { UniqueCard } from "../Components/Home/UniqueCard";
+import { UniqueCardToWebspy } from "../Components/Home/UniqueCardToWebspy";
+import { AuthContext } from "../Contexts/AuthContext";
 
 export const Home = () => {
   const navigate = useNavigate();
-  const client = new ClientJS();
   const [notes, setNotes] = React.useState<any>([]);
   const [loading, setLoading] = React.useState(true);
   const { user }: any = useContext(UserContext);
@@ -23,10 +23,16 @@ export const Home = () => {
     []
   );
 
+  const { setAuth, auth }: any = React.useContext(AuthContext);
+
   React.useEffect(() => {
     (async () => {
       const responseNotes = await axiosPrivate
-        .get("notes")
+        .get("notes", {
+          headers: {
+            authorization: `Bearer ${auth.accessToken}`,
+          },
+        })
         .then((res) => {
           setNotes(res.data);
         })
@@ -38,11 +44,21 @@ export const Home = () => {
 
       try {
         const { data: productsUserDontHave } = await axiosPrivate.get(
-          `users/products/dont-have/${user?.id}`
+          `users/products/dont-have/${user?.id}`,
+          {
+            headers: {
+              authorization: `Bearer ${auth.accessToken}`,
+            },
+          }
         );
 
         const { data: productsUserHave } = await axiosPrivate.get(
-          "users/products/me"
+          "users/products/me",
+          {
+            headers: {
+              authorization: `Bearer ${auth.accessToken}`,
+            },
+          }
         );
 
         setProductsUserDontHave(productsUserDontHave);
@@ -123,7 +139,7 @@ export const Home = () => {
               {user?.System_Permissions.some(
                 (item: any) => item.name === "get_adminer"
               ) && (
-                <UniqueCard
+                <UniqueCardToWebspy
                   photo={
                     "https://webspy.com.br/Images/slider/adminer-rocket2.png"
                   }
@@ -135,7 +151,7 @@ export const Home = () => {
               {user?.System_Permissions.some(
                 (item: any) => item.name === "get_adminer"
               ) && (
-                <UniqueCard
+                <UniqueCardToWebspy
                   photo={"	https://www.webspy.com.br/uploads/adheart.png"}
                   name={"Adheart"}
                   id={""}
@@ -153,13 +169,23 @@ export const Home = () => {
                 />
               )}
               {user?.System_Permissions.some(
-                (item: any) => item.name === "get_bigpsy"
+                (item: any) => item.name === "get_adminer"
               ) && (
                 <UniqueCard
                   photo={"https://www.webspy.com.br/uploads/bigspy.webp"}
                   name={"Bigspy"}
                   id={""}
                   url={`https://bigspy.com`}
+                />
+              )}
+              {user?.System_Permissions.some(
+                (item: any) => item.name === "get_adminer"
+              ) && (
+                <UniqueCard
+                  photo={"https://webspy.com.br/uploads/1688523807481"}
+                  name={"Pipiads"}
+                  id={""}
+                  url={`https://pipiads.com`}
                 />
               )}
               {user?.System_Permissions.some(
@@ -205,7 +231,7 @@ export const Home = () => {
             ) : (
               <>
                 {!user?.System_Permissions.some(
-                  (item) => item.name === "get_adminer"
+                  (item: any) => item.name === "get_adminer"
                 ) && (
                   <CardProductsWithUserDontHave
                     photo={

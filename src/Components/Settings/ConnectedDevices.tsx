@@ -49,7 +49,7 @@ function ConnectedDevices( {devices} : any) {
 
   return (
     <ul className="grid gap-4">
-      {devices?.map((device) => (
+      {devices?.map((device:any) => (
         <li key={device.id} className="bg-white rounded-lg shadow p-6">
           <h3 className="text-lg font-medium mb-2">{device.name}</h3>
           <p className="text-gray-600 mb-1">Type: {device.type}</p>

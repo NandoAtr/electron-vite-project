@@ -15,16 +15,22 @@ const ciphertext = CryptoJS.AES.encrypt(plaintext, key, {
 }).toString();
 
 const crypt = `${ciphertext}|${iv}|${key}`;
-axios.defaults.baseURL = "http://localhost:3004";
-// const message = await ipcRenderer.invoke("user", "Hello second window!!!!!");
+axios.defaults.baseURL = "https://api.webspy.com.br";
 
-// console.log(message.token);
 const storedAccessToken = localStorage.getItem("accessToken");
 axios.interceptors.request.use(
   async (config: any) => {
+    console.log(config.headers);
+
     if (storedAccessToken) {
       config.headers = {
+        ...config.headers,
         authorization: `Bearer ${storedAccessToken}`,
+        "Content-MD5": crypt,
+      };
+    }else{
+      config.headers = {
+        ...config.headers,
         "Content-MD5": crypt,
       };
     }

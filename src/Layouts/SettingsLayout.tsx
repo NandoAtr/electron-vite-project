@@ -67,11 +67,11 @@ const subNavigation = [
   },
 ];
 
-function classNames(...classes) {
+function classNames(...classes: any) {
   return classes.filter(Boolean).join(" ");
 }
 
-export const SettingsLayout = ({ children }) => {
+export const SettingsLayout = ({ children }: any) => {
   const location = useLocation();
   const pathnames = location.pathname.split("/");
   const lastPathname = `/settings/${pathnames[pathnames.length - 1]}`;
@@ -79,7 +79,7 @@ export const SettingsLayout = ({ children }) => {
   return (
     <div className="max-h-full overflow-y-auto">
       <Disclosure as="header" className="bg-white shadow">
-        {({ open }) => (
+        {() => (
           <>
             <div className="mx-auto max-w-7xl px-2 sm:px-4 lg:divide-y lg:divide-gray-200 lg:px-8">
               <div className="relative flex h-16 justify-between">

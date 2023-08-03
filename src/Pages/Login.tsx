@@ -53,22 +53,13 @@ export default function Login() {
       setSuccessfully(true);
       const accessToken = response.data.accessToken;
       const refreshToken = response.data.refreshToken;
-      // const session = JSON.stringify(response.data)
-      // localStorage.setItem('session',session)\\
-
-      // ipcRenderer.send("set-user", {
-      //   token: accessToken,
-      //   refreshToken: refreshToken,
-      // });
-
-      // const message = await ipcRenderer.invoke(
-      //   "user",
-      //   "Hello second window!!!!!"
-      // );
 
       console.log(message);
-      setAuth(true);
+      setAuth({ auth: true, accessToken, refreshToken });
 
+      //clear local storage
+      localStorage.clear();
+      //set local storage
       localStorage.setItem("accessToken", accessToken);
       localStorage.setItem("refreshToken", refreshToken);
       navigate("/home");
