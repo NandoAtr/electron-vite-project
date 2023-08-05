@@ -1845,6 +1845,7 @@ electron-to-chromium@^1.4.431:
   resolved "https://registry.npmjs.org/electron-to-chromium/-/electron-to-chromium-1.4.468.tgz"
   integrity sha512-6M1qyhaJOt7rQtNti1lBA0GwclPH+oKCmsra/hkcWs5INLxfXXD/dtdnaKUYQu/pjOBP/8Osoe4mAcNvvzoFag==
 
+<<<<<<< HEAD
 electron-updater@^6.1.1:
   version "6.1.1"
   resolved "https://registry.yarnpkg.com/electron-updater/-/electron-updater-6.1.1.tgz#4ede9b560936957b2b87181736f98b1621fa26fd"
@@ -1859,6 +1860,8 @@ electron-updater@^6.1.1:
     semver "^7.3.8"
     typed-emitter "^2.1.0"
 
+=======
+>>>>>>> origin/master
 electron@^24.6.5:
   version "24.6.5"
   resolved "https://registry.npmjs.org/electron/-/electron-24.6.5.tgz"

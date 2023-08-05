@@ -28,6 +28,7 @@ export const Home = () => {
   const { setAuth, auth }: any = React.useContext(AuthContext);
   console.log(user)
 
+
   React.useEffect(() => {
     (async () => {
       const responseNotes = await axiosPrivate

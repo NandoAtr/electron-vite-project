@@ -68,6 +68,23 @@ ipcMain.handle("userAgent", () => {
   return formattedUserAgentString;
 });
 
+const image = nativeImage.createFromPath(__dirname + "/img/icon.png");
+// where public folder on the root dir
+image.setTemplateImage(true);
+
+// let icon: any;
+// switch (process.platform) {
+//   case "win32":
+//     icon = path.resolve(__dirname, "img", "icon.ico");
+//     break;
+//   case "darwin":
+//     icon = path.resolve(__dirname, "img", "icon.icns");
+//     break;
+//   case "linux":
+//     icon = path.resolve(__dirname, "img", "icon.png");
+//     break;
+// }
+
 // The built directory structure
 //
 // ├─┬─┬ dist

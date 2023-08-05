@@ -77,6 +77,10 @@ function setProfile(newProfile: any) {
 
 async function setTokensBeforeRequest(config: any) {
   const token = getAccessToken(); // Assuming userStore is defined and working
+<<<<<<< HEAD
+=======
+  console.log("setTokensBeforeRequest", token);
+>>>>>>> origin/master
   if (token) {
     config.headers = {
       ...config.headers,
