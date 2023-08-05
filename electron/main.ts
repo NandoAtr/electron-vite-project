@@ -292,7 +292,12 @@ function createWindow() {
 
   mainSession.webRequest.onBeforeRequest((details: any, callback: any) => {
     // Execute your action here before the request
-    if (details.url.includes("semrush") && details.url.includes("logout")) {
+    if (
+      (details.url.includes("semrush") && details.url.includes("logout")) ||
+      (details.url.includes("bigspy") && details.url.includes("logout")) ||
+      details.url.includes("unbind-user-device") ||
+      (details.url.includes("pipiads") && details.url.includes("logout"))
+    ) {
       // Cancel the request
       console.log("você não tem permissao para fazer isso");
       callback({ cancel: true });
@@ -1058,6 +1063,5 @@ autoUpdater.on("update-downloaded", (event: UpdateDownloadedEvent) => {
 //     downloadWindow.webContents.send('update-download-progress', progressObj);
 //   }
 // });
-
 
 app.whenReady().then(createWindow);
