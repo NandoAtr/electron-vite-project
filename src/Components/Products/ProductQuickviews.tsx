@@ -16,11 +16,11 @@ const product = {
   ],
 };
 
-function classNames(...classes) {
+function classNames(...classes: any) {
   return classes.filter(Boolean).join(" ");
 }
 
-export default function ProductQuickviews({ setIsOpen, product }) {
+export default function ProductQuickviews({ setIsOpen }: any) {
   return (
     <>
       <div className="fixed inset-0 hidden bg-gray-500 bg-opacity-75 transition-opacity md:block"></div>
@@ -32,8 +32,7 @@ export default function ProductQuickviews({ setIsOpen, product }) {
                 <iframe
                   src="https://marketplace.webspy.com.br/produto/semrush"
                   className="w-full h-full min-h-[90vh] max-h-[1200px]"
-                >
-                </iframe>
+                ></iframe>
                 <div
                   className="absolute top-0 bg-red-500 right-0 w-[32px] h-[32px] rounded-full flex items-center justify-center text-white cursor-pointer "
                   onClick={() => setIsOpen(false)}

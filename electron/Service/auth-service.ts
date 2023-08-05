@@ -45,64 +45,62 @@ function setProfile(newProfile: any) {
   return auth.profile;
 }
 
-async function refreshTokens() {
-  const refreshToken = await keytar.getPassword(keytarService, keytarAccount);
+// async function refreshTokens() {
+//   const refreshToken = await keytar.getPassword(keytarService, keytarAccount);
 
-  if (refreshToken) {
-    const refreshOptions = {
-      method: "POST",
-      url: `https://${auth0Domain}/oauth/token`,
-      headers: { "content-type": "application/json" },
-      data: {
-        grant_type: "refresh_token",
-        client_id: clientId,
-        refresh_token: refreshToken,
-      },
-    };
+//   if (refreshToken) {
+//     const refreshOptions = {
+//       method: "POST",
+//       url: `https://${auth0Domain}/oauth/token`,
+//       headers: { "content-type": "application/json" },
+//       data: {
+//         grant_type: "refresh_token",
+//         client_id: clientId,
+//         refresh_token: refreshToken,
+//       },
+//     };
 
-    try {
-      const response = await axios(refreshOptions);
+//     try {
+//       const response = await axios(refreshOptions);
 
-      accessToken = response.data.access_token;
-      profile = jwtDecode(response.data.id_token);
-    } catch (error) {
-      await logout();
+//       accessToken = response.data.access_token;
+//       profile = jwtDecode(response.data.id_token);
+//     } catch (error) {
+//       await logout();
 
-      throw error;
-    }
-  } else {
-    throw new Error("No available refresh token.");
-  }
-}
+//       throw error;
+//     }
+//   } else {
+//     throw new Error("No available refresh token.");
+//   }
+// }
 
 async function setTokensBeforeRequest(config: any) {
-    const token = getAccessToken(); // Assuming userStore is defined and working
-    console.log("setTokensBeforeRequest", token)
-    if (token) {
-      config.headers = {
-        ...config.headers,
-        'teste': 'teste',
-        'Authorization': `Bearer ${token}`,
-      };
-    }
-  
-    return config;
+  const token = getAccessToken(); // Assuming userStore is defined and working
+  if (token) {
+    config.headers = {
+      ...config.headers,
+      teste: "teste",
+      Authorization: `Bearer ${token}`,
+    };
   }
-  
-  const axiosInstance = axios.create();
-  axiosInstance.defaults.baseURL = 'http://localhost:3004';
-  axiosInstance.interceptors.request.use(setTokensBeforeRequest);
 
-function getLogOutUrl() {
-  return `https://${auth0Domain}/v2/logout`;
+  return config;
 }
+
+const axiosInstance = axios.create();
+axiosInstance.defaults.baseURL = "http://localhost:3004";
+axiosInstance.interceptors.request.use(setTokensBeforeRequest);
+
+// function getLogOutUrl() {
+//   return `https://${auth0Domain}/v2/logout`;
+// }
 
 export {
   getAccessToken,
   setAccessToken,
-  getLogOutUrl,
+  // getLogOutUrl,
   setRefreshToken,
   getRefreshToken,
   setTokensBeforeRequest,
-  refreshTokens,
 };

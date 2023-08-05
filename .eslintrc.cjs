@@ -10,5 +10,8 @@ module.exports = {
   plugins: ['react-refresh'],
   rules: {
     'react-refresh/only-export-components': 'warn',
+    //ignore is declared but its value is never read.
+     // Disable the "@typescript-eslint/no-unused-vars" rule
+     "@typescript-eslint/no-unused-vars" : "off"
   },
 }

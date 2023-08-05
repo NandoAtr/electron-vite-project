@@ -14,7 +14,6 @@ function getWinSettings() {
 
 function saveBounds(bounds: any) {
   storage.set("win-size", bounds);
-  console.log(bounds);
 }
 
 export { getWinSettings, saveBounds };

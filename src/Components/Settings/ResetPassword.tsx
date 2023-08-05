@@ -123,7 +123,6 @@ export default function ResetPassword() {
             id="confirmPassword"
             placeholder="Confirm Password"
             type="password"
-            name="confirmPassword"
             {...register("confirmPassword", {
               required: "Confirm Password is required",
               validate: (value) =>

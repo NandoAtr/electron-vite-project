@@ -3,61 +3,73 @@ import { AuthResponse } from "../../@Types/Api";
 import { memoizedRefreshToken } from "./refreshToken";
 import CryptoJS from "crypto-js";
 import { ClientJS } from "clientjs";
-const { ipcRenderer } = window.require("electron");
+const { ipcRenderer: ipcRenderer$3 } = window.require('electron');
+
 const client = new ClientJS();
-const plaintext = client.getUserAgent();
-const key = CryptoJS.lib.WordArray.random(16).toString(); // 32-character hex key for AES-128
-const iv = CryptoJS.lib.WordArray.random(16); // 16-byte initialization vector
 
-// Encrypt the plaintext
-const ciphertext = CryptoJS.AES.encrypt(plaintext, key, {
-  iv: iv,
-}).toString();
+const main = async () => {
+  const plaintext = await ipcRenderer$3.invoke('userAgent');
+  const key = CryptoJS.lib.WordArray.random(16);
+  const iv = CryptoJS.lib.WordArray.random(16);
 
-const crypt = `${ciphertext}|${iv}|${key}`;
-axios.defaults.baseURL = "http://localhost:3004";
-// const message = await ipcRenderer.invoke("user", "Hello second window!!!!!");
+  // Encrypt the plaintext
+  const ciphertext = CryptoJS.AES.encrypt(plaintext, key, {
+    iv: iv,
+  }).toString();
 
-// console.log(message.token);
-const storedAccessToken = localStorage.getItem("accessToken");
-axios.interceptors.request.use(
-  async (config: any) => {
-    if (storedAccessToken) {
-      config.headers = {
-        authorization: `Bearer ${storedAccessToken}`,
-        "Content-MD5": crypt,
-      };
-    }
+  const crypt = `${ciphertext}|${iv}|${key}`;
 
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
+  axios.defaults.baseURL = "https://api.webspy.com.br";
 
-axios.interceptors.response.use(
-  (response) => response,
-  async (error) => {
-    const config = error?.config;
-
-    if (
-      error?.response?.status === 401 &&
-      !config?.sent &&
-      error?.response?.data?.message === "Invalid or expired token"
-    ) {
-      config.sent = true;
-
-      const result = await memoizedRefreshToken();
-
-      if (result?.accessToken) {
+  const storedAccessToken = localStorage.getItem("accessToken");
+  axios.interceptors.request.use(
+    async (config:any) => {
+      if (storedAccessToken) {
         config.headers = {
-          authorization: `Bearer ${result?.accessToken}`,
+          ...config.headers,
+          authorization: `Bearer ${storedAccessToken}`,
+          "Content-MD5": crypt,
+        };
+      } else {
+        config.headers = {
+          ...config.headers,
+          "Content-MD5": crypt,
         };
       }
 
-      return axios(config);
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
+
+  axios.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+      const config = error?.config;
+
+      if (
+        error?.response?.status === 401 &&
+        !config?.sent &&
+        error?.response?.data?.message === "Invalid or expired token"
+      ) {
+        config.sent = true;
+
+        // If you are using memoizedRefreshToken, provide its implementation here
+        // const result = await memoizedRefreshToken();
+
+        // if (result?.accessToken) {
+        //   config.headers = {
+        //     authorization: `Bearer ${result?.accessToken}`,
+        //   };
+        // }
+
+        return axios(config);
+      }
+      return Promise.reject(error);
     }
-    return Promise.reject(error);
-  }
-);
+  );
+};
+
+main();
 
 export const axiosPrivate = axios;

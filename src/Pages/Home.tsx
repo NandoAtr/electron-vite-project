@@ -1,6 +1,5 @@
 import React, { useContext } from "react";
 import { axiosPrivate } from "../Common/http/axiosPrivate";
-import { Cards } from "../Components/Home/Cards";
 import { UserContext } from "../Contexts/UserContext";
 import { ClientJS } from "clientjs";
 import ComponentLoader from "../Components/Loader/ComponentLoader";
@@ -9,10 +8,12 @@ import { Notification } from "../Components/Notification/NotificationSimple";
 import { CiFaceSmile } from "react-icons/ci";
 import { useNavigate } from "react-router-dom";
 import { UniqueCard } from "../Components/Home/UniqueCard";
+import { UniqueCardToWebspy } from "../Components/Home/UniqueCardToWebspy";
+import { AuthContext } from "../Contexts/AuthContext";
+import MaxDeviceLimitExceededPopup from "../Components/Error/MaxDeviceLimitExceededPopup";
 
 export const Home = () => {
   const navigate = useNavigate();
-  const client = new ClientJS();
   const [notes, setNotes] = React.useState<any>([]);
   const [loading, setLoading] = React.useState(true);
   const { user }: any = useContext(UserContext);
@@ -22,27 +23,49 @@ export const Home = () => {
   const [productsUserDontHave, setProductsUserDontHave] = React.useState<any>(
     []
   );
+  const [devicePopUp, setDevicePopUp] = React.useState(false);
+
+  const { setAuth, auth }: any = React.useContext(AuthContext);
+  console.log(user)
 
   React.useEffect(() => {
     (async () => {
       const responseNotes = await axiosPrivate
-        .get("notes")
+        .get("notes", {
+          headers: {
+            authorization: `Bearer ${auth.accessToken}`,
+          },
+        })
         .then((res) => {
           setNotes(res.data);
         })
         .catch((err) => {
+          if (err.response.data.message === "Maximum device limit exceeded") {
+            console.log(err.response.data.message);
+            setDevicePopUp(true);
+          }
           if (err.response.data === "You are banned!") {
             console.log("You are banned!");
           }
         });
 
       try {
-        const { data: productsUserDontHave } = await axiosPrivate.get(
-          `users/products/dont-have/${user?.id}`
-        );
+        // const { data: productsUserDontHave } = await axiosPrivate.get(
+        //   `users/products/dont-have/${user?.id}`,
+        //   {
+        //     headers: {
+        //       authorization: `Bearer ${auth.accessToken}`,
+        //     },
+        //   }
+        // );
 
         const { data: productsUserHave } = await axiosPrivate.get(
-          "users/products/me"
+          "users/products/me",
+          {
+            headers: {
+              authorization: `Bearer ${auth.accessToken}`,
+            },
+          }
         );
 
         setProductsUserDontHave(productsUserDontHave);
@@ -111,6 +134,7 @@ export const Home = () => {
           }
         />
       )}
+      {devicePopUp && <MaxDeviceLimitExceededPopup />}
       <div className=" bg-[#09080D] w-full pt-4 p-4 pl-8 h-full xl:h-full pb-12 overflow-y-scroll">
         <h2 className="sm:ml-2 bg-gradient-to-r from-[#57048a] to-[#4528dc] spanCustom font-bold  text-2xl mb-6">
           Suas Ferramentas
@@ -120,10 +144,10 @@ export const Home = () => {
             <ComponentLoader />
           ) : (
             <>
-              {user?.System_Permissions.some(
+              {user?.System_Permissions?.some(
                 (item: any) => item.name === "get_adminer"
               ) && (
-                <UniqueCard
+                <UniqueCardToWebspy
                   photo={
                     "https://webspy.com.br/Images/slider/adminer-rocket2.png"
                   }
@@ -132,17 +156,17 @@ export const Home = () => {
                   url={`https://adminer.webspy.com.br/`}
                 />
               )}
-              {user?.System_Permissions.some(
-                (item: any) => item.name === "get_adminer"
+              {user?.System_Permissions?.some(
+                (item: any) => item.name === "get_adheart"
               ) && (
-                <UniqueCard
+                <UniqueCardToWebspy
                   photo={"	https://www.webspy.com.br/uploads/adheart.png"}
                   name={"Adheart"}
                   id={""}
                   url={`https://adheart.webspy.com.br/home`}
                 />
               )}
-              {user?.System_Permissions.some(
+              {user?.System_Permissions?.some(
                 (item: any) => item.name !== "get_semrush"
               ) && (
                 <UniqueCard
@@ -152,8 +176,8 @@ export const Home = () => {
                   url={`https://pt.semrush.com/projects/`}
                 />
               )}
-              {user?.System_Permissions.some(
-                (item: any) => item.name === "get_bigpsy"
+              {user?.System_Permissions?.some(
+                (item: any) => item.name === "get_bigspy"
               ) && (
                 <UniqueCard
                   photo={"https://www.webspy.com.br/uploads/bigspy.webp"}
@@ -162,7 +186,17 @@ export const Home = () => {
                   url={`https://bigspy.com`}
                 />
               )}
-              {user?.System_Permissions.some(
+              {user?.System_Permissions?.some(
+                (item: any) => item.name === "get_pipiads"
+              ) && (
+                <UniqueCard
+                  photo={"https://webspy.com.br/uploads/1688523807481"}
+                  name={"Pipiads"}
+                  id={""}
+                  url={`https://pipiads.com`}
+                />
+              )}
+              {user?.System_Permissions?.some(
                 (item: any) => item.name === "get_adspy"
               ) && (
                 <UniqueCard
@@ -172,7 +206,7 @@ export const Home = () => {
                   url={`https://adspy.webspy.com.br/login`}
                 />
               )}
-              {user?.System_Permissions.some(
+              {user?.System_Permissions?.some(
                 (item: any) => item.name === "get_nichescrapper"
               ) && (
                 <UniqueCard
@@ -182,7 +216,7 @@ export const Home = () => {
                   url={`https://adspy.webspy.com.br/login`}
                 />
               )}
-              {user?.System_Permissions.some(
+              {user?.System_Permissions?.some(
                 (item: any) => item.name === "get_adserea"
               ) && (
                 <UniqueCard
@@ -195,7 +229,7 @@ export const Home = () => {
             </>
           )}
         </div>
-        <div className=" bg-[#09080D] w-full pt-4 p-4  h-full xl:h-full pb-12">
+        {/* <div className=" bg-[#09080D] w-full pt-4 p-4  h-full xl:h-full pb-12">
           <h2 className=" bg-gradient-to-r from-[#57048a] to-[#4528dc] spanCustom font-bold  text-2xl mb-6">
             Ferramentas Disponiveis
           </h2>
@@ -204,8 +238,8 @@ export const Home = () => {
               <ComponentLoader />
             ) : (
               <>
-                {!user?.System_Permissions.some(
-                  (item) => item.name === "get_adminer"
+                {!user?.System_Permissions?.some(
+                  (item: any) => item.name === "get_adminer"
                 ) && (
                   <CardProductsWithUserDontHave
                     photo={
@@ -230,7 +264,7 @@ export const Home = () => {
               </>
             )}
           </div>
-        </div>
+        </div> */}
       </div>
     </>
   );

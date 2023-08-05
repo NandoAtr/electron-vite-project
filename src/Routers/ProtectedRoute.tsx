@@ -10,16 +10,29 @@ function ProtectedRoute({ children }: any) {
 
   React.useEffect(() => {
     axiosPrivate
-      .get("/users/me")
+      .get("/users/me", {
+        headers: {
+          authorization: `Bearer ${auth.accessToken}`,
+        },
+      })
       .then(() => {
-        setAuth(true);
+        setAuth({
+          auth: true,
+          acessToken: auth.accessToken,
+          refreshToken: auth.refreshToken,
+        });
       })
       .catch(() => {
-        setAuth(false);
+        setAuth({
+          auth: false,
+          acessToken: auth.accessToken,
+          refreshToken: auth.refreshToken,
+        });
       });
   }, []);
 
-  if (!auth) {
+
+  if (!auth.auth) {
     return <Navigate to="/login" replace />;
   }
 

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { CiFaceFrown } from "react-icons/ci";
 import { Information } from "../Notification/Information";
 import { BsFillCheckCircleFill } from "react-icons/bs";
+import { AuthContext } from "../../Contexts/AuthContext";
 const { ipcRenderer } = window.require("electron");
 
 type productType = {
@@ -12,21 +13,24 @@ type productType = {
   url: string;
 };
 
-export const UniqueCard = (product: productType) => {
+export const UniqueCardToWebspy = (product: productType) => {
   const [successfully, setSuccessfully] = React.useState(false);
   const [error, setError] = React.useState(false);
   const [message, setMessage] = React.useState("");
   const [loading, setLoading] = React.useState(false);
+  const { auth }: any = React.useContext(AuthContext);
 
   const onOpen = async () => {
     setLoading(true);
-    const storedAccessToken = localStorage.getItem("accessToken");
-
-    const mensagem = await ipcRenderer.invoke("open-new-window", {
+    // const storedAccessToken = localStorage.getItem("accessToken");
+    // const refreshToken = localStorage.getItem("refreshToken");
+    const mensagem = await ipcRenderer.invoke("open-new-window-to-webspy", {
       url: `${product?.url}`,
-      token: storedAccessToken,
+      accessToken: auth.acessToken,
       tool: product.name,
+      refreshToken: auth.refreshToken,
     });
+
     if (mensagem !== "Ops... ocorreu um error!") {
       setLoading(false);
       setSuccessfully(true);
@@ -49,7 +53,7 @@ export const UniqueCard = (product: productType) => {
           disabled
           className="flex flex-col rounded-lg items-center bg-[#16151B]  p-4 gap-2 pb-6 opacity-60"
         >
-          <div className="max-w-[180px] min-w-[180px] relative">
+          <div className="max-w-[180px] min-w-[180px] relative ">
             <img
               className="rounded-lg mx-auto min-h-[180px]"
               src={product.photo}

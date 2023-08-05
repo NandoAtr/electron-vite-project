@@ -13,6 +13,7 @@ export default function Login() {
   const navigate = useNavigate();
 
   const { auth, setAuth }: any = React.useContext(AuthContext);
+  const [loading, setLoading] = React.useState(false);
   const [successfully, setSuccessfully] = React.useState(false);
   const [error, setError] = React.useState(false);
   const [message, setMessage] = React.useState("");
@@ -24,6 +25,7 @@ export default function Login() {
   } = useForm();
 
   const onSubmit = async (data: any) => {
+    setLoading(true);
     const response: any = await axios
       .post("https://api.webspy.com.br/auth/signin", data)
       .catch((error: any) => {
@@ -53,24 +55,19 @@ export default function Login() {
       setSuccessfully(true);
       const accessToken = response.data.accessToken;
       const refreshToken = response.data.refreshToken;
-      // const session = JSON.stringify(response.data)
-      // localStorage.setItem('session',session)\\
 
-      // ipcRenderer.send("set-user", {
-      //   token: accessToken,
-      //   refreshToken: refreshToken,
-      // });
+      console.log(accessToken);
+      setAuth({ auth: true, accessToken, refreshToken });
 
-      // const message = await ipcRenderer.invoke(
-      //   "user",
-      //   "Hello second window!!!!!"
-      // );
+      //set in electron  main
+      ipcRenderer.send("set-user", { token: accessToken, refreshToken });
 
-      console.log(message);
-      setAuth(true);
-
+      //clear local storage
+      localStorage.clear();
+      //set local storage
       localStorage.setItem("accessToken", accessToken);
       localStorage.setItem("refreshToken", refreshToken);
+      setLoading(false);
       navigate("/home");
       setSuccessfully(false);
     }
@@ -89,7 +86,7 @@ export default function Login() {
           Faça Login em sua conta
         </h2>
       </div>
-      <div className="w-full py-6 px-4 m-auto bg-[#16151A] rounded-md shadow-md lg:max-w-xl text-[#888888] text-left ">
+      <div className="w-full py-6 px-4 m-auto bg-[#16151A] rounded-md shadow-md lg:max-w-xl text-[#888888] text-left pb-8">
         <div className="mt-6">
           <div className="mb-3">
             <input
@@ -121,24 +118,26 @@ export default function Login() {
             Esqueceu Sua Senha?
           </a>
           <div className="mt-6">
-            <button
-              // onClick={() => sendMessageToMainProcess()}
-              className="w-full px-4 py-2 tracking-wide text-white transition-colors duration-200 transdiv bg-gradient-to-r from-[#57048a] to-[#4528dc] rounded-md "
-            >
-              Login
-            </button>
+            {loading ? (
+              <button
+                // onClick={() => sendMessageToMainProcess()}
+                disabled
+                className="w-full px-4 py-2 tracking-wide text-white transition-colors duration-200 transdiv bg-gradient-to-r from-[#57048a] to-[#4528dc] rounded-md "
+              >
+                <div className="flex justify-center items-center h-6">
+                  <div className="border-t-4 border-blue-500 border-solid rounded-full h-6 w-6 animate-spin"></div>
+                </div>
+              </button>
+            ) : (
+              <button
+                // onClick={() => sendMessageToMainProcess()}
+                className="w-full px-4 py-2 tracking-wide text-white transition-colors duration-200 transdiv bg-gradient-to-r from-[#57048a] to-[#4528dc] rounded-md "
+              >
+                Login
+              </button>
+            )}
           </div>
         </div>
-        <p className="mt-8 text-xs font-light text-center text-gray-700">
-          {" "}
-          Ainda não possui uma conta?{" "}
-          <Link
-            to="/registrar"
-            className="font-medium text-purple-600 hover:underline"
-          >
-            Registrar-se
-          </Link>
-        </p>
       </div>
       {successfully ? (
         <Information
