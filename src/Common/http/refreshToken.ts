@@ -2,7 +2,6 @@ import mem from "mem";
 import { AuthResponse } from "../../@Types/Api";
 
 import { axiosPublic } from "./axios";
-const { ipcRenderer } = window.require("electron");
 const refreshTokenFn = async () => {
   const storedAccessToken = localStorage.getItem("accessToken");
   const refreshTokenToken = localStorage.getItem("refreshToken");

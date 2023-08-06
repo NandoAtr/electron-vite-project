@@ -20,6 +20,7 @@ function UserProvider({ children }: UserProviderProps) {
           authorization: `Bearer ${auth.accessToken}`,
         },
       });
+      console.log(data)
 
       setUser(data.user);
     })();

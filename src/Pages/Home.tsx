@@ -16,7 +16,6 @@ export const Home = () => {
   const navigate = useNavigate();
   const [notes, setNotes] = React.useState<any>([]);
   const [loading, setLoading] = React.useState(true);
-  const { user }: any = useContext(UserContext);
   const [productsUserHave, setProductsUserHave] = React.useState<Array<any>>(
     []
   );
@@ -25,9 +24,8 @@ export const Home = () => {
   );
   const [devicePopUp, setDevicePopUp] = React.useState(false);
 
-  const { setAuth, auth }: any = React.useContext(AuthContext);
-  console.log(user)
-
+  const { auth }: any = React.useContext(AuthContext);
+  console.log(auth);
 
   React.useEffect(() => {
     (async () => {
@@ -51,15 +49,6 @@ export const Home = () => {
         });
 
       try {
-        // const { data: productsUserDontHave } = await axiosPrivate.get(
-        //   `users/products/dont-have/${user?.id}`,
-        //   {
-        //     headers: {
-        //       authorization: `Bearer ${auth.accessToken}`,
-        //     },
-        //   }
-        // );
-
         const { data: productsUserHave } = await axiosPrivate.get(
           "users/products/me",
           {
@@ -77,7 +66,7 @@ export const Home = () => {
         navigate("/login");
       }
     })();
-  }, [user]);
+  }, []);
 
   const products = [
     {
@@ -145,7 +134,7 @@ export const Home = () => {
             <ComponentLoader />
           ) : (
             <>
-              {user?.System_Permissions?.some(
+              {auth.user?.System_Permissions?.some(
                 (item: any) => item.name === "get_adminer"
               ) && (
                 <UniqueCardToWebspy
@@ -157,7 +146,7 @@ export const Home = () => {
                   url={`https://adminer.webspy.com.br/`}
                 />
               )}
-              {user?.System_Permissions?.some(
+              {auth.user?.System_Permissions?.some(
                 (item: any) => item.name === "get_adheart"
               ) && (
                 <UniqueCardToWebspy
@@ -167,7 +156,7 @@ export const Home = () => {
                   url={`https://adheart.webspy.com.br/home`}
                 />
               )}
-              {user?.System_Permissions?.some(
+              {auth.user?.System_Permissions?.some(
                 (item: any) => item.name !== "get_semrush"
               ) && (
                 <UniqueCard
@@ -177,7 +166,7 @@ export const Home = () => {
                   url={`https://pt.semrush.com/projects/`}
                 />
               )}
-              {user?.System_Permissions?.some(
+              {auth.user?.System_Permissions?.some(
                 (item: any) => item.name === "get_bigspy"
               ) && (
                 <UniqueCard
@@ -187,7 +176,7 @@ export const Home = () => {
                   url={`https://bigspy.com`}
                 />
               )}
-              {user?.System_Permissions?.some(
+              {auth.user?.System_Permissions?.some(
                 (item: any) => item.name === "get_pipiads"
               ) && (
                 <UniqueCard
@@ -197,7 +186,7 @@ export const Home = () => {
                   url={`https://pipiads.com`}
                 />
               )}
-              {user?.System_Permissions?.some(
+              {auth.user?.System_Permissions?.some(
                 (item: any) => item.name === "get_adspy"
               ) && (
                 <UniqueCard
@@ -207,7 +196,7 @@ export const Home = () => {
                   url={`https://adspy.webspy.com.br/login`}
                 />
               )}
-              {user?.System_Permissions?.some(
+              {auth.user?.System_Permissions?.some(
                 (item: any) => item.name === "get_nichescrapper"
               ) && (
                 <UniqueCard
@@ -217,7 +206,7 @@ export const Home = () => {
                   url={`https://adspy.webspy.com.br/login`}
                 />
               )}
-              {user?.System_Permissions?.some(
+              {auth.user?.System_Permissions?.some(
                 (item: any) => item.name === "get_adserea"
               ) && (
                 <UniqueCard
@@ -239,7 +228,7 @@ export const Home = () => {
               <ComponentLoader />
             ) : (
               <>
-                {!user?.System_Permissions?.some(
+                {!auth.user?.System_Permissions?.some(
                   (item: any) => item.name === "get_adminer"
                 ) && (
                   <CardProductsWithUserDontHave

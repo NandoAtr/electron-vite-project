@@ -12,6 +12,7 @@ function AuthProvider({ children }: AuthProviderProps) {
     auth: true,
     acessToken: "",
     refreshToken: "",
+    user: {},
   });
 
   return (

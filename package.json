@@ -1,7 +1,7 @@
 {
   "name": "webspy",
   "private": true,
-  "version": "0.1.3",
+  "version": "0.1.0",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build && electron-builder",
@@ -64,7 +64,7 @@
         {
           "provider": "github",
           "owner": "NandoAtr",
-          "repo": "electron-app-autoupdater-windows"
+          "repo": "webspy-app-autoupdater-windows"
         }
       ]
     },
@@ -76,7 +76,7 @@
         {
           "provider": "github",
           "owner": "NandoAtr",
-          "repo": "electron-app-autoupdater"
+          "repo": "webspy-app-autoupdater"
         }
       ]
     },

@@ -6,7 +6,6 @@ import { Information } from "../Components/Notification/Information";
 import { BsFillCheckCircleFill } from "react-icons/bs";
 import { CiFaceFrown } from "react-icons/ci";
 import { useForm } from "react-hook-form";
-const { ipcRenderer } = window.require("electron");
 export default function Login() {
   const [login, setLogin] = React.useState({});
 
@@ -29,6 +28,7 @@ export default function Login() {
     const response: any = await axios
       .post("https://api.webspy.com.br/auth/signin", data)
       .catch((error: any) => {
+        setLoading(false);
         if (error.response) {
           // The request was made and the server responded with a status code
           // that falls out of the range of 2xx
@@ -56,17 +56,13 @@ export default function Login() {
       const accessToken = response.data.accessToken;
       const refreshToken = response.data.refreshToken;
 
-      console.log(accessToken);
-      setAuth({ auth: true, accessToken, refreshToken });
+      setAuth({
+        auth: true,
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+        user: auth.user,
+      });
 
-      //set in electron  main
-      ipcRenderer.send("set-user", { token: accessToken, refreshToken });
-
-      //clear local storage
-      localStorage.clear();
-      //set local storage
-      localStorage.setItem("accessToken", accessToken);
-      localStorage.setItem("refreshToken", refreshToken);
       setLoading(false);
       navigate("/home");
       setSuccessfully(false);

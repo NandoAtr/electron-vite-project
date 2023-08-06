@@ -10,7 +10,6 @@ import {
 import path from "node:path";
 import axios from "axios";
 import os from "os";
-import userStore from "./Storage/userStore";
 import { getWinSettings, saveBounds } from "./Storage/setting";
 import {
   setTokensBeforeRequest,
@@ -29,7 +28,7 @@ const image = nativeImage.createFromPath(__dirname + "/img/icon.png");
 
 // where public folder on the root dir
 image.setTemplateImage(true);
-
+const openedWindowURLs: string[] = [];
 // Function to extract the Electron version from the user agent string
 function getElectronVersion(userAgent: any) {
   const match = userAgent.match(/Electron\/(\S+)/);
@@ -68,9 +67,9 @@ ipcMain.handle("userAgent", () => {
   return formattedUserAgentString;
 });
 
-const image = nativeImage.createFromPath(__dirname + "/img/icon.png");
-// where public folder on the root dir
-image.setTemplateImage(true);
+// const image = nativeImage.createFromPath(__dirname + "/img/icon.png");
+// // where public folder on the root dir
+// image.setTemplateImage(true);
 
 // let icon: any;
 // switch (process.platform) {
@@ -107,7 +106,6 @@ const userAgent =
   "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36";
 
 //reload app 1 time when app is ready
-let reload = false;
 
 function createWindow() {
   const size: any = getWinSettings();
@@ -774,89 +772,107 @@ ipcMain.handle("open-new-window", async (event, arg) => {
 });
 async function createNewWindow(arg: any) {
   try {
-    const request = await axios.get(
-      `https://api.webspy.com.br/requests/tool/${arg.tool}`,
-      {
-        headers: {
-          authorization: `Bearer ${arg.token}`,
+    if (!openedWindowURLs.includes(arg?.tool)) {
+      const request = await axios.get(
+        `https://api.webspy.com.br/requests/tool/${arg.tool}`,
+        {
+          headers: {
+            authorization: `Bearer ${arg.token}`,
+          },
+        }
+      );
+      const cookies = JSON.parse(request.data.cookies);
+
+      const updatedData = cookies?.map((item: any) => {
+        const newObj = {
+          ...item,
+          url: `https://www.${arg.tool}.com`,
+          domain: `${arg.tool}.com`,
+          sameSite: item.sameSite === null ? "unspecified" : item.sameSite,
+        };
+        return newObj;
+      });
+
+      const newWindow = new BrowserWindow({
+        width: 1000,
+        height: 700,
+        title: `${arg?.tool} - Webspy`,
+        webPreferences: {
+          nodeIntegration: true,
         },
-      }
-    );
-    const cookies = JSON.parse(request.data.cookies);
+        skipTaskbar: true,
+      });
 
-    const updatedData = cookies?.map((item: any) => {
-      const newObj = {
-        ...item,
-        url: `https://www.${arg.tool}.com`,
-        domain: `${arg.tool}.com`,
-        sameSite: item.sameSite === null ? "unspecified" : item.sameSite,
-      };
-      return newObj;
-    });
+      const mainSession = newWindow.webContents.session;
 
-    const newWindow = new BrowserWindow({
-      width: 1000,
-      height: 700,
-      title: `${arg?.tool} - Webspy`,
-      webPreferences: {
-        nodeIntegration: true,
-      },
-      skipTaskbar: true,
-    });
+      mainSession.webRequest.onBeforeRequest((details, callback) => {
+        // Execute your action here before the request
+        if (
+          (details.url.includes("semrush") && details.url.includes("logout")) ||
+          (details.url.includes("bigspy") && details.url.includes("logout")) ||
+          details.url.includes("unbind-user-device") ||
+          (details.url.includes("pipiads") && details.url.includes("logout"))
+        ) {
+          // Cancel the request
+          const NOTIFICATION_TITLE = "Você não tem permissao ";
+          const NOTIFICATION_BODY =
+            "Você não tem permissão para efetuar essa ação, por favor, use sua ferramenta com moderação.";
 
-    const mainSession = newWindow.webContents.session;
+          new Notification({
+            title: NOTIFICATION_TITLE,
+            body: NOTIFICATION_BODY,
+          }).show();
+          newWindow.loadURL(`${arg.url}`);
+          callback({ cancel: true });
+        } else {
+          // Continue the request for other URLs
+          callback({ cancel: false });
+        }
+      });
+      win.webContents.on("will-navigate", (event: any, url: any) => {
+        // Check if the URL should be blocked
+        if (url.includes("https://google.com")) {
+          event.preventDefault(); // Prevent the navigation
+          console.log("Blocked navigation to:", url);
+        } else {
+          console.log("Allowed navigation to:", url);
+        }
+      });
 
-    mainSession.webRequest.onBeforeRequest((details, callback) => {
-      // Execute your action here before the request
-      if (
-        (details.url.includes("semrush") && details.url.includes("logout")) ||
-        (details.url.includes("bigspy") && details.url.includes("logout")) ||
-        details.url.includes("unbind-user-device") ||
-        (details.url.includes("pipiads") && details.url.includes("logout"))
-      ) {
-        // Cancel the request
-        const NOTIFICATION_TITLE = "Você não tem permissao ";
-        const NOTIFICATION_BODY =
-          "Você não tem permissão para efetuar essa ação, por favor, use sua ferramenta com moderação.";
+      updatedData.forEach(async (cookie: any) => {
+        try {
+          const result = await mainSession.cookies.set(cookie);
+        } catch (error) {
+          console.error("Error setting cookie:", error);
+        }
+      });
+      openedWindowURLs.push(arg?.tool);
+      newWindow.on("closed", () => {
+        const index = openedWindowURLs.indexOf(arg?.tool);
+        if (index !== -1) {
+          openedWindowURLs.splice(index, 1);
+        }
+      });
+      newWindow.loadURL(`${arg.url}`, { userAgent });
+      return "Success";
+    } else {
+      const NOTIFICATION_TITLE = "Janela já aberta";
+      const NOTIFICATION_BODY =
+        "Você já tem uma janela aberta com essa ferramenta, por favor, feche a janela atual para abrir uma nova";
 
-        new Notification({
-          title: NOTIFICATION_TITLE,
-          body: NOTIFICATION_BODY,
-        }).show();
-        newWindow.loadURL(`${arg.url}`);
-        callback({ cancel: true });
-      } else {
-        // Continue the request for other URLs
-        callback({ cancel: false });
-      }
-    });
-    win.webContents.on("will-navigate", (event: any, url: any) => {
-      // Check if the URL should be blocked
-      if (url.includes("https://google.com")) {
-        event.preventDefault(); // Prevent the navigation
-        console.log("Blocked navigation to:", url);
-      } else {
-        console.log("Allowed navigation to:", url);
-      }
-    });
-
-    updatedData.forEach(async (cookie: any) => {
-      try {
-        const result = await mainSession.cookies.set(cookie);
-      } catch (error) {
-        console.error("Error setting cookie:", error);
-      }
-    });
-
-    newWindow.loadURL(`${arg.url}`, { userAgent });
-    return "Success";
+      new Notification({
+        title: NOTIFICATION_TITLE,
+        body: NOTIFICATION_BODY,
+      }).show();
+      return "Janela já aberta";
+    }
   } catch (e) {
     return "Ops... ocorreu um error!";
   }
 }
+
 ipcMain.handle("open-new-window-to-webspy", async (event, arg) => {
   const ignore = event;
-  console.log("open-new-window-to-webspy foi execultado");
 
   try {
     const mensagem = await createNewWindowToWebspyTool(arg);
@@ -869,128 +885,135 @@ ipcMain.handle("open-new-window-to-webspy", async (event, arg) => {
 
 async function createNewWindowToWebspyTool(arg: any) {
   try {
-    const accessTokenSplit = [
-      arg.accessToken?.slice(0, arg.accessToken?.length / 2),
-      arg.accessToken?.slice(
-        arg.accessToken?.length / 2,
-        arg.accessToken?.length
-      ),
-    ];
+    if (!openedWindowURLs.includes(arg?.tool)) {
+      const accessTokenSplit = [
+        arg.accessToken?.slice(0, arg.accessToken?.length / 2),
+        arg.accessToken?.slice(
+          arg.accessToken?.length / 2,
+          arg.accessToken?.length
+        ),
+      ];
 
-    const refreshTokenSplit = [
-      arg.refreshToken?.slice(0, arg.refreshToken?.length / 2),
-      arg.refreshToken?.slice(
-        arg.refreshToken?.length / 2,
-        arg.refreshToken?.length
-      ),
-    ];
+      const refreshTokenSplit = [
+        arg.refreshToken?.slice(0, arg.refreshToken?.length / 2),
+        arg.refreshToken?.slice(
+          arg.refreshToken?.length / 2,
+          arg.refreshToken?.length
+        ),
+      ];
 
-    const cookies = [
-      {
-        url: "https://webspy.com.br",
-        domain: "webspy.com.br",
-        sameSite: "unspecified",
-        expirationDate: 1722121868,
-        hostOnly: false,
-        httpOnly: false,
-        name: "accessToken",
-        path: "/",
-        secure: false,
-        session: false,
-        storeId: null,
-        value: accessTokenSplit[0],
-      },
-      {
-        url: "https://webspy.com.br",
-        domain: "webspy.com.br",
-        sameSite: "unspecified",
-        expirationDate: 1722121868,
-        hostOnly: false,
-        httpOnly: false,
-        name: "accessToken2",
-        path: "/",
-        secure: false,
-        session: false,
-        storeId: null,
-        value: accessTokenSplit[1],
-      },
-      {
-        url: "https://webspy.com.br",
-        domain: "webspy.com.br",
-        sameSite: "unspecified",
-        expirationDate: 1722121868,
-        hostOnly: false,
-        httpOnly: false,
-        name: "refreshToken",
-        path: "/",
-        secure: false,
-        session: false,
-        storeId: null,
-        value: refreshTokenSplit[0],
-      },
-      {
-        url: "https://webspy.com.br",
-        domain: "webspy.com.br",
-        sameSite: "unspecified",
-        expirationDate: 1722121868,
-        hostOnly: false,
-        httpOnly: false,
-        name: "refreshToken2",
-        path: "/",
-        secure: false,
-        session: false,
-        storeId: null,
-        value: refreshTokenSplit[1],
-      },
-    ];
+      const cookies = [
+        {
+          url: "https://webspy.com.br",
+          domain: "webspy.com.br",
+          sameSite: "unspecified",
+          expirationDate: 1722121868,
+          hostOnly: false,
+          httpOnly: false,
+          name: "accessToken",
+          path: "/",
+          secure: false,
+          session: false,
+          storeId: null,
+          value: accessTokenSplit[0],
+        },
+        {
+          url: "https://webspy.com.br",
+          domain: "webspy.com.br",
+          sameSite: "unspecified",
+          expirationDate: 1722121868,
+          hostOnly: false,
+          httpOnly: false,
+          name: "accessToken2",
+          path: "/",
+          secure: false,
+          session: false,
+          storeId: null,
+          value: accessTokenSplit[1],
+        },
+        {
+          url: "https://webspy.com.br",
+          domain: "webspy.com.br",
+          sameSite: "unspecified",
+          expirationDate: 1722121868,
+          hostOnly: false,
+          httpOnly: false,
+          name: "refreshToken",
+          path: "/",
+          secure: false,
+          session: false,
+          storeId: null,
+          value: refreshTokenSplit[0],
+        },
+        {
+          url: "https://webspy.com.br",
+          domain: "webspy.com.br",
+          sameSite: "unspecified",
+          expirationDate: 1722121868,
+          hostOnly: false,
+          httpOnly: false,
+          name: "refreshToken2",
+          path: "/",
+          secure: false,
+          session: false,
+          storeId: null,
+          value: refreshTokenSplit[1],
+        },
+      ];
 
-    const newWindowToWebspy = new BrowserWindow({
-      width: 1000,
-      height: 700,
-      title: `${arg?.tool} - Webspy`,
-      webPreferences: {
-        nodeIntegration: true,
-      },
-    });
+      const newWindowToWebspy = new BrowserWindow({
+        width: 1000,
+        height: 700,
+        title: `${arg?.tool} - Webspy`,
+        webPreferences: {
+          nodeIntegration: true,
+        },
+      });
 
-    //clear all cookies from windows
+      //clear all cookies from windows
 
-    const mainSessionToWebspy = newWindowToWebspy.webContents.session;
-    mainSessionToWebspy.clearStorageData({
-      storages: ["cookies"],
-    });
+      const mainSessionToWebspy = newWindowToWebspy.webContents.session;
+      mainSessionToWebspy.clearStorageData({
+        storages: ["cookies"],
+      });
 
-    const getCookie = await mainSessionToWebspy.cookies.get({});
+      const getCookie = await mainSessionToWebspy.cookies.get({});
 
-    cookies.forEach(async (cookie: any) => {
-      try {
-        const result = await mainSessionToWebspy.cookies.set(cookie);
-        console.log("new cookie to webspy");
-      } catch (error) {
-        console.error("Error setting cookie:", error);
-      }
-    });
-    newWindowToWebspy.loadURL(`${arg.url}`, {
-      userAgent: formattedUserAgentString,
-    });
-    return "Success";
+      cookies.forEach(async (cookie: any) => {
+        try {
+          const result = await mainSessionToWebspy.cookies.set(cookie);
+          console.log("new cookie to webspy");
+        } catch (error) {
+          console.error("Error setting cookie:", error);
+        }
+      });
+      openedWindowURLs.push(arg?.tool);
+      newWindowToWebspy.on("closed", () => {
+        const index = openedWindowURLs.indexOf(arg?.tool);
+        if (index !== -1) {
+          openedWindowURLs.splice(index, 1);
+        }
+      });
+      newWindowToWebspy.loadURL(`${arg.url}`, {
+        userAgent: formattedUserAgentString,
+      });
+      return "Success";
+    } else {
+      const NOTIFICATION_TITLE = "Janela já aberta";
+      const NOTIFICATION_BODY =
+        "Você já tem uma janela aberta com essa ferramenta, por favor, feche a janela atual para abrir uma nova";
+
+      new Notification({
+        title: NOTIFICATION_TITLE,
+        body: NOTIFICATION_BODY,
+      }).show();
+      return "Janela já aberta";
+    }
   } catch (e) {
     console.log(e);
     return "Ops... ocorreu um error!";
   }
 }
-
-ipcMain.on("set-user", (event, arg) => {
-  const ignore = event;
-  setAccessToken(arg.token);
-  setRefreshToken(arg.refreshToken);
-});
-
-ipcMain.handle("user", () => {
-  const token = getAccessToken();
-  const refreshToken = getRefreshToken();
-  return { token: token, refreshToken: refreshToken };
-});
 
 autoUpdater.on("update-available", (_event: UpdateInfo) => {
   const dialogOpts: any = {

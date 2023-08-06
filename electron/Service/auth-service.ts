@@ -1,6 +1,5 @@
 import axios from "axios";
 import os from "os";
-import userStore from "../Storage/userStore";
 // import CryptoJS from "crypto-js";
 // import { ClientJS } from "clientjs";
 // const client = new ClientJS();
@@ -77,10 +76,6 @@ function setProfile(newProfile: any) {
 
 async function setTokensBeforeRequest(config: any) {
   const token = getAccessToken(); // Assuming userStore is defined and working
-<<<<<<< HEAD
-=======
-  console.log("setTokensBeforeRequest", token);
->>>>>>> origin/master
   if (token) {
     config.headers = {
       ...config.headers,

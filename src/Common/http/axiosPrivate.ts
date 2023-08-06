@@ -3,12 +3,12 @@ import { AuthResponse } from "../../@Types/Api";
 import { memoizedRefreshToken } from "./refreshToken";
 import CryptoJS from "crypto-js";
 import { ClientJS } from "clientjs";
-const { ipcRenderer: ipcRenderer$3 } = window.require('electron');
+const { ipcRenderer: ipcRenderer$3 } = window.require("electron");
 
 const client = new ClientJS();
 
 const main = async () => {
-  const plaintext = await ipcRenderer$3.invoke('userAgent');
+  const plaintext = await ipcRenderer$3.invoke("userAgent");
   const key = CryptoJS.lib.WordArray.random(16);
   const iv = CryptoJS.lib.WordArray.random(16);
 
@@ -19,15 +19,15 @@ const main = async () => {
 
   const crypt = `${ciphertext}|${iv}|${key}`;
 
-  axios.defaults.baseURL = "https://api.webspy.com.br";
+  axios.defaults.baseURL = "https://api.webspy.com.br/";
 
-  const storedAccessToken = localStorage.getItem("accessToken");
   axios.interceptors.request.use(
-    async (config:any) => {
-      if (storedAccessToken) {
+    async (config: any) => {
+      console.log(config.headers.authorization);
+      if (config.headers.authorization) {
         config.headers = {
           ...config.headers,
-          authorization: `Bearer ${storedAccessToken}`,
+          authorization: `${config.headers.authorization}`,
           "Content-MD5": crypt,
         };
       } else {
