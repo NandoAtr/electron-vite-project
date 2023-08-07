@@ -781,6 +781,7 @@ async function createNewWindow(arg: any) {
           },
         }
       );
+      console.log(arg?.tool);
       const cookies = JSON.parse(request.data.cookies);
 
       const updatedData = cookies?.map((item: any) => {
@@ -973,6 +974,21 @@ async function createNewWindowToWebspyTool(arg: any) {
       //clear all cookies from windows
 
       const mainSessionToWebspy = newWindowToWebspy.webContents.session;
+
+      mainSessionToWebspy.webRequest.onBeforeRequest((details, callback) => {
+        // Execute your action here before the request
+        if (
+          (details.url.includes("dashboard") &&
+            details.url.includes("webspy")) ||
+          (details.url.includes("dashboard") && details.url.includes("webspy"))
+        ) {
+          newWindowToWebspy.close();
+          callback({ cancel: true });
+        } else {
+          // Continue the request for other URLs
+          callback({ cancel: false });
+        }
+      });
       mainSessionToWebspy.clearStorageData({
         storages: ["cookies"],
       });

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { CiFaceFrown } from "react-icons/ci";
 import { Information } from "../Notification/Information";
 import { BsFillCheckCircleFill } from "react-icons/bs";
+import { AuthContext } from "../../Contexts/AuthContext";
 const { ipcRenderer } = window.require("electron");
 
 type productType = {
@@ -17,14 +18,14 @@ export const UniqueCard = (product: productType) => {
   const [error, setError] = React.useState(false);
   const [message, setMessage] = React.useState("");
   const [loading, setLoading] = React.useState(false);
+  const { auth }: any = React.useContext(AuthContext);
 
   const onOpen = async () => {
     setLoading(true);
-    const storedAccessToken = localStorage.getItem("accessToken");
 
     const mensagem = await ipcRenderer.invoke("open-new-window", {
       url: `${product?.url}`,
-      token: storedAccessToken,
+      token: auth.acessToken,
       tool: product.name,
     });
     if (mensagem !== "Ops... ocorreu um error!") {

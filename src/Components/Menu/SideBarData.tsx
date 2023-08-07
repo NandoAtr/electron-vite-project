@@ -48,7 +48,7 @@ export const SideBarData = ({toggle}:Props) => {
           </span>
           <span>Suas Ferramentas</span>
         </Link>
-        <Link to="/forum" className="flex items-center w-full space-x-2 text-white bg-indigo-600 rounded-lg">
+        <Link to="/settings/profile" className="flex items-center w-full space-x-2 text-white bg-indigo-600 rounded-lg">
           <span className="p-3 bg-indigo-700 rounded-lg">
             <MdForum className='text-xl mx-auto' />
           </span>
@@ -60,7 +60,7 @@ export const SideBarData = ({toggle}:Props) => {
           </span>
           <span>Suporte</span>
         </a>
-        <Link to="/breve" className="flex items-center w-full space-x-2 text-white bg-indigo-600 rounded-lg">
+        <Link to="/settings/profile" className="flex items-center w-full space-x-2 text-white bg-indigo-600 rounded-lg">
           <span className="p-3 bg-indigo-700 rounded-lg">
             <BiHelpCircle className='text-xl mx-auto' />
           </span>
